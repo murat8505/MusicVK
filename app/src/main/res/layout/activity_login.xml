@@ -15,7 +15,8 @@
         android:textColorHint="#bfbfbf"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
-        android:inputType="textEmailAddress"/>
+        android:inputType="textEmailAddress"
+        android:textColor="#212121"/>
 
     <EditText
         android:singleLine="true"
@@ -30,7 +31,8 @@
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
         android:inputType="textPassword"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif"
+        android:textColor="#212121"/>
 
     <Button
         android:layout_width="50dp"

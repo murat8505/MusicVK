@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:singleLine="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:id="@+id/login"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="230dp"
+        android:hint="@string/login_hint"
+        android:textColorHint="#bfbfbf"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:inputType="textEmailAddress"/>
+
+    <EditText
+        android:singleLine="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:id="@+id/password"
+        android:layout_below="@+id/login"
+        android:layout_centerHorizontal="true"
+        android:hint="@string/password_hint"
+        android:textColorHint="#bfbfbf"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:inputType="textPassword"
+        android:fontFamily="sans-serif"/>
+
+    <Button
+        android:layout_width="50dp"
+        android:layout_height="30dp"
+        android:text="@string/go"
+        android:id="@+id/loginButton"
+        android:layout_below="@+id/password"
+        android:layout_centerHorizontal="true"
+        android:background="#5b95c2"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="10dp"
+        android:onClick="login"/>
+</RelativeLayout>

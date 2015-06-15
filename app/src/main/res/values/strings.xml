@@ -3,4 +3,15 @@
     <string name="go">Go</string>
     <string name="password_hint">Password</string>
     <string name="login_hint">Phone number or e-mail</string>
+
+    <string name="go_deeper">We must go deeper</string>
+    <string name="logout">Logout</string>
+
+    <string name="not_logged">You\'re not logged in</string>
+    <string name="log_in">Log in</string>
+
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="hello_world">You did it</string>
+
 </resources>

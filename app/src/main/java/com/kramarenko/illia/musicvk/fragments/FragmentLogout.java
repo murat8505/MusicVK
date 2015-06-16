@@ -18,6 +18,7 @@ import com.vk.sdk.VKSdk;
  */
 public class FragmentLogout extends Fragment implements View.OnClickListener{
 
+    protected final String TAG = getClass().getSimpleName();
 
     private Button logIn;
     private String[] sMyScope;

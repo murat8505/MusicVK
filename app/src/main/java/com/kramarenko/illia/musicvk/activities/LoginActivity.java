@@ -23,31 +23,28 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.dialogs.VKCaptchaDialog;
 
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends LifecycleLoggingActivity {
 
+    protected final String TAG = getClass().getSimpleName();
 
     /**
      * Scope is set of required permissions for your application
      * @see <a href="https://vk.com/dev/permissions">vk.com api permissions documentation</a>
      */
     private static final String[] sMyScope = new String[] {
-            VKScope.FRIENDS,
-            VKScope.WALL,
-            VKScope.PHOTOS,
+            VKScope.AUDIO,
             VKScope.NOHTTPS
     };
     public static final String SCOPE_KEY = "scope" ;
 
     private static final String appId = "4920885";
 
-    private static final String TAG = "LoginActivity";
-
     private EditText login;
     private EditText password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "Login Activity onCreate");
+        Log.d(TAG, "Login Activity onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         VKSdk.initialize(sdkListener, appId);

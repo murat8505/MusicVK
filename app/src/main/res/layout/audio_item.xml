@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:text="Aaa"
+            android:text="Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             android:id="@+id/songTitle"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/playButton"
@@ -38,13 +38,15 @@
             android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp"
             android:textColor="#212121"
-            android:singleLine="true"/>
+            android:singleLine="true"
+            android:layout_toLeftOf="@+id/duration"
+            android:layout_toStartOf="@+id/duration"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:text="555"
+            android:text="123456:55"
             android:id="@+id/duration"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"

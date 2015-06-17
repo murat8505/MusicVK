@@ -39,8 +39,6 @@ public class LoginActivity extends LifecycleLoggingActivity {
 
     private static final String appId = "4920885";
 
-    private EditText login;
-    private EditText password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +48,6 @@ public class LoginActivity extends LifecycleLoggingActivity {
         VKSdk.initialize(sdkListener, appId);
         VKUIHelper.onCreate(this);
 
-        login = (EditText) findViewById(R.id.login);
-        password = (EditText) findViewById(R.id.password);
-
-    }
-
-    public void login(View view) {
-        Toast.makeText(getApplicationContext(), "login: " + login.getText().toString()
-                            + " password: " + password.getText().toString(), Toast.LENGTH_SHORT).show();
     }
 
     /**

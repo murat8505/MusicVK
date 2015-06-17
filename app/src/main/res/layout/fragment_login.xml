@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.kramarenko.illia.musicvk.fragments.FragmentLogin"
-    android:background="#eeeeee">
+    android:background="@color/background">
 
 
     <RelativeLayout

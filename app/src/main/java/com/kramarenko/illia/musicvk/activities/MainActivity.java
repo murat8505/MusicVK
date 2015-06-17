@@ -2,13 +2,24 @@ package com.kramarenko.illia.musicvk.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kramarenko.illia.musicvk.R;
 import com.kramarenko.illia.musicvk.fragments.AudioListFragment;
+import com.kramarenko.illia.musicvk.fragments.PlayerFragment;
 import com.kramarenko.illia.musicvk.json.VKResponseJSONParser;
 import com.kramarenko.illia.musicvk.ops.AudioItem;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.vk.sdk.VKUIHelper;
 import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKApiConst;
@@ -22,14 +33,13 @@ public class MainActivity extends LifecycleLoggingActivity {
     // Tag for debug
     protected final String TAG = getClass().getSimpleName();
 
-    // Number of audios to download
-    private final int count = 30;
+    // player fragment
+    private PlayerFragment playerFragment;
 
-    // Fragment with list of audios
-    private AudioListFragment audioListFragment;
+    // Toolbar
+    private Toolbar toolbar;
 
-    // Error display if request to VK is failed
-    private TextView errorTextBox;
+    private Drawer result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,59 +47,65 @@ public class MainActivity extends LifecycleLoggingActivity {
         setContentView(R.layout.activity_main);
         VKUIHelper.onCreate(this);
 
-        errorTextBox = (TextView) findViewById(R.id.smallTestText);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        audioListFragment = new AudioListFragment();
+
+        result = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withName(R.string.drawer_item_home),
+                        new DividerDrawerItem(),
+                        new SecondaryDrawerItem().withName(R.string.drawer_item_settings)
+                )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(AdapterView<?> parent, View view, int position, long id, IDrawerItem drawerItem) {
+                        // do something with the clicked item :D
+                        switch (position){
+                            case 1:
+                                Toast.makeText(MainActivity.this, "Item home", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 2:
+                                Toast.makeText(MainActivity.this, "DIVIDER???", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 3:
+                                Toast.makeText(MainActivity.this, "Item settings?????", Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                        return true;
+                    }
+                })
+                .build();
+
+        //use the result object to get different views of the drawer or modify it's data
+        //some sample calls
+        /*
+        result.setSelectionByIdentifier(1);
+        result.openDrawer();
+        result.closeDrawer();
+        result.isDrawerOpen();*/
+
+
+        playerFragment = new PlayerFragment();
         getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_cont_big, audioListFragment)
+                .replace(R.id.main_container, playerFragment)
                 .commit();
-
-        getAudio();
     }
 
-    private void getAudio(){
-        Log.d(TAG, "getAudio method");
-        VKRequest request = VKApi.audio().get(VKParameters.from(VKApiConst.COUNT, count));
-        request.secure = false;
-        request.useSystemLanguage = false;
-        request.executeWithListener(mRequestListener);
+    @Override
+    public void onBackPressed() {
+        // Закрываем Navigation Drawer по нажатию системной кнопки "Назад" если он открыт
+        if (result.isDrawerOpen()) {
+            result.closeDrawer();
+        } else {
+            super.onBackPressed();
+        }
     }
 
-
-    VKRequest.VKRequestListener mRequestListener = new VKRequest.VKRequestListener()
-    {
-        @Override
-        public void onComplete(VKResponse response)
-        {
-            Log.d(TAG, "mRequestListener onComplete");
-            AudioItem[] audioItems = VKResponseJSONParser.parseJSONvkresponse(response);
-            Log.d(TAG, "Sending parsed items to fragment");
-            audioListFragment.addItems(audioItems);
-        }
-
-        @Override
-        public void onError(VKError error)
-        {
-            Log.d(TAG, "mRequestListener onError");
-            errorTextBox.setText(error.toString());
-        }
-
-        @Override
-        public void onProgress(VKRequest.VKProgressType progressType, long bytesLoaded,
-                               long bytesTotal)
-        {
-            Log.d(TAG, "mRequestListener onProgress. SHIT DOESN'T WORK WTF");
-            errorTextBox.setText(progressType.toString() + ": " + String.valueOf(bytesLoaded) + "/" + String.valueOf(bytesTotal));
-        }
-
-        @Override
-        public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts)
-        {
-            Log.d(TAG, "mRequestListener attemptFailed");
-            errorTextBox.setText(String.format("Attempt %d/%d failed\n", attemptNumber, totalAttempts));
-        }
-    };
 
     @Override
     protected void onResume() {

@@ -3,9 +3,10 @@ package com.kramarenko.illia.musicvk.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-public abstract class LifecycleLoggingActivity extends Activity {
+public abstract class LifecycleLoggingActivity extends AppCompatActivity {
     /**
      * Debugging tag used by the Android logger.
      */

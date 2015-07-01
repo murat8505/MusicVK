@@ -16,7 +16,7 @@ public class VKResponseJSONParser {
 
     protected final static String TAG = "VKResponseJSONParser";
 
-    public static AudioItem[] parseJSONvkresponse(VKResponse response){
+    public static AudioItem[] parseAudioItems(VKResponse response){
         Log.d(TAG, "Entered parse method");
         JSONObject dataJsonObj = response.json;
         AudioItem[] items = null;
@@ -35,7 +35,8 @@ public class VKResponseJSONParser {
                 String artist = song.getString("artist");
                 String title = song.getString("title");
                 long duration = song.getLong("duration");
-                items[i] = new AudioItem(artist, title, duration);
+                String url = song.getString("url");
+                items[i] = new AudioItem(artist, title, duration, url);
 
                 Log.d(TAG, "Audio " + i + " added:" + artist
                         + " - " + title + " " + duration);
@@ -50,7 +51,7 @@ public class VKResponseJSONParser {
         } else {
             Log.d(TAG, "AudioItems is null somehow. Returning ERRitem");
             AudioItem[] errItem = new AudioItem[1];
-            errItem[0] = new AudioItem("Error while", "getting audioItems array", 20L );
+            errItem[0] = new AudioItem("Error while", "getting audioItems array", 20L , "");
             return errItem;
         }
     }

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.kramarenko.illia.musicvk.R;
-import com.kramarenko.illia.musicvk.activities.LoginActivity;
+import com.kramarenko.illia.musicvk.activities.MainActivity;
 import com.vk.sdk.VKSdk;
 
 /**
@@ -37,7 +37,7 @@ public class FragmentLogout extends Fragment implements View.OnClickListener{
                              Bundle savedInstanceState) {
 
         Bundle args = getArguments();
-        sMyScope = args.getStringArray(LoginActivity.SCOPE_KEY);
+        sMyScope = args.getStringArray(MainActivity.SCOPE_KEY);
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_logout, container, false);
 

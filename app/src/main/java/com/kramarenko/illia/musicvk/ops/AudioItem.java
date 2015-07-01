@@ -8,17 +8,20 @@ public class AudioItem {
     private String artist;
     private String title;
     private long duration;
+    private String url;
 
     public AudioItem(){
         artist = "Unknown";
         title = "Unknown";
         duration = 0;
+        url = "";
     }
 
-    public AudioItem(String artist, String title, long duration){
+    public AudioItem(String artist, String title, long duration, String url){
         this.artist = artist;
         this.title = title;
         this.duration = duration;
+        this.url = url;
     }
 
     public long getDuration() {
@@ -33,6 +36,10 @@ public class AudioItem {
         return title;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public void setArtist(String artist) {
         this.artist = artist;
     }
@@ -43,5 +50,9 @@ public class AudioItem {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

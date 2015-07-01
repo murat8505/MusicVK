@@ -12,8 +12,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kramarenko.illia.musicvk.R;
+import com.kramarenko.illia.musicvk.fragments.AudioListFragment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,10 +27,14 @@ public class AudioItemsAdapter extends BaseAdapter{
 
     private List<AudioItem> items = new ArrayList<AudioItem>();
     private final Context context;
+    private LayoutInflater layoutInflater;
+    private AudioListFragment callback;
 
 
-    public AudioItemsAdapter(Context c){
+    public AudioItemsAdapter(Context c, AudioListFragment callback){
         context = c;
+        this.callback = callback;
+        layoutInflater = LayoutInflater.from(context);
     }
 
     public void add(AudioItem item) {
@@ -64,12 +70,16 @@ public class AudioItemsAdapter extends BaseAdapter{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Log.d(TAG, "GET VIEW");
+        // load more audio if scrolled enough
+        if(position > ((AudioListFragment.COUNT + AudioListFragment.OFFSET) - 5)){
+            // Get more songs
+            callback.getAudio();
+        }
+
         final AudioItem audioItem = items.get(position);
 
         RelativeLayout audioLayout;
-
         if(convertView == null) {
-            LayoutInflater layoutInflater = LayoutInflater.from(context);
             audioLayout = (RelativeLayout) layoutInflater.inflate(R.layout.audio_item, null, false);
             Log.d(TAG, "Made NEW View");
         } else {
@@ -93,12 +103,16 @@ public class AudioItemsAdapter extends BaseAdapter{
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "Now playing: " + audioItem.getArtist() + ":" + audioItem.getTitle(), Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Now playing: " + audioItem.getArtist() + " - " + audioItem.getTitle(), Toast.LENGTH_SHORT)
                         .show();
             }
         });
 
-
         return audioLayout;
+    }
+
+    public void addItems(AudioItem[] newItems) {
+        Collections.addAll(items, newItems);
+        notifyDataSetChanged();
     }
 }

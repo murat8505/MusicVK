@@ -1,13 +1,17 @@
 package com.kramarenko.illia.musicvk.fragments;
 
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.kramarenko.illia.musicvk.R;
@@ -21,7 +25,8 @@ import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 
 
-public class PlayerFragment extends Fragment {
+public class PlayerFragment extends Fragment
+        implements View.OnClickListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
 
     protected final String TAG = getClass().getSimpleName();
 
@@ -31,23 +36,41 @@ public class PlayerFragment extends Fragment {
     // Fragment with list of audios
     private AudioListFragment audioListFragment;
 
-    // Number of audios to download
-    private final int count = 30;
+    // Set of playback control buttons
+    private ImageButton playPauseButton;
+    private ImageButton skipPrevButton;
+    private ImageButton skipNextButton;
 
+    // Seekbar
+    private SeekBar seekBar;
+    // current seek
+    private int seek=0;
+
+    //  Song title in player
+    private TextView playerSongTitle;
+
+    // Media player
+    private MediaPlayer mediaPlayer;
+    // Checks if MP is paused
+    private boolean isPaused=false;
+
+    // this value contains the song duration in milliseconds. Look at getDuration() method in MediaPlayer class
+    private int mediaFileLengthInMilliseconds;
+
+    // Curent song number
+    private int currentSongNumber = 0;
+    // Progress
+    private int seekProgress = 0;
+
+    private final Handler handler = new Handler();
+
+    // Required empty public constructor
     public PlayerFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        audioListFragment = new AudioListFragment();
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.player_cont_big, audioListFragment)
-                .commit();
-
     }
 
     @Override
@@ -55,54 +78,221 @@ public class PlayerFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_player, container, false);
-        errorTextBox = (TextView) v.findViewById(R.id.smallTestText);
 
-        getAudio();
+        initViev(v);
+        loadListFragment();
 
         return v;
     }
 
-    private void getAudio(){
-        Log.d(TAG, "getAudio method");
-        VKRequest request = VKApi.audio().get(VKParameters.from(VKApiConst.COUNT, count));
-        request.secure = false;
-        request.useSystemLanguage = false;
-        request.executeWithListener(mRequestListener);
+    // Initialize view elements
+    private void initViev(View v){
+        Log.d(TAG, "Initializing view");
+
+        // Error message textbox
+        errorTextBox = (TextView) v.findViewById(R.id.smallTestText);
+
+        // Set of playback buttons
+        playPauseButton = (ImageButton) v.findViewById(R.id.playPauseButton);
+        skipPrevButton = (ImageButton) v.findViewById(R.id.skipPrevButton);
+        skipNextButton = (ImageButton) v.findViewById(R.id.skipNextbutton);
+        playPauseButton.setOnClickListener(this);
+        skipPrevButton.setOnClickListener(this);
+        skipNextButton.setOnClickListener(this);
+
+        // Seekbar
+        seekBar = (SeekBar) v.findViewById(R.id.seekBar);
+        seekBar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        int playPositionInMilliseconds = (mediaFileLengthInMilliseconds / 100) * seekProgress;
+                        mediaPlayer.seekTo(playPositionInMilliseconds);
+                    }
+                }
+                return false;
+            }
+        });
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // TODO: TRY TO GET RID OF THIS UGLY HACK... or at least make it less ugly
+                seekProgress = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        // song title
+        playerSongTitle = (TextView) v.findViewById(R.id.playerSongTitle);
+
+        // Media player
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setOnBufferingUpdateListener(this);
+        mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnPreparedListener(this);
+    }
+
+    // Load list of music loaded from vk
+    private void loadListFragment(){
+        Log.d(TAG, "loading List Fragment");
+        audioListFragment = new AudioListFragment();
+        audioListFragment.setErrorTextBox(errorTextBox);
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.player_cont_big, audioListFragment)
+                .commit();
+    }
+
+    @Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+        /** Method which updates the SeekBar secondary progress by current song loading from URL position*/
+        seekBar.setSecondaryProgress(percent);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.playPauseButton){
+            /** ImageButton onClick event handler. Method which start/pause mediaplayer playing */
+            if(mediaPlayer.isPlaying()) {
+                Log.d(TAG, "MediaPlayer is playing... Paused");
+                isPaused = true;
+                pause();
+            } else {
+                if(isPaused) {
+                    Log.d(TAG, "Media Player is paused... Playing again");
+                    isPaused = false;
+                    play();
+                } else {
+                    Log.d(TAG, "Media Player is not ready. Preparing and starting");
+                    prepareAndStart();
+                    Log.d(TAG, "Song number: " + currentSongNumber);
+                }
+            }
+        }
+        if(v.getId() == R.id.skipNextbutton){
+           skipNext();
+        }
+        if(v.getId() == R.id.skipPrevButton){
+            if(mediaPlayer.getCurrentPosition() > 5000 || currentSongNumber < 1){
+                replayCurrent();
+            } else {
+                skipPrev();
+            }
+        }
     }
 
 
-    VKRequest.VKRequestListener mRequestListener = new VKRequest.VKRequestListener()
-    {
-        @Override
-        public void onComplete(VKResponse response)
-        {
-            Log.d(TAG, "mRequestListener onComplete");
-            AudioItem[] audioItems = VKResponseJSONParser.parseJSONvkresponse(response);
-            Log.d(TAG, "Sending parsed items to fragment");
-            audioListFragment.addItems(audioItems);
-        }
+    private void skipNext(){
+        Log.d(TAG, "Skipping to next song");
+        stopAndReset();
+        ++currentSongNumber;
+        prepareAndStart();
+        Log.d(TAG, "New song number: " + currentSongNumber);
+    }
 
-        @Override
-        public void onError(VKError error)
-        {
-            Log.d(TAG, "mRequestListener onError");
-            errorTextBox.setText(error.toString());
-        }
+    private void skipPrev(){
+        Log.d(TAG, "Skipping to previous song");
+        stopAndReset();
+        --currentSongNumber;
+        prepareAndStart();
+        Log.d(TAG, "New song number: " + currentSongNumber);
+    }
 
-        @Override
-        public void onProgress(VKRequest.VKProgressType progressType, long bytesLoaded,
-                               long bytesTotal)
-        {
-            Log.d(TAG, "mRequestListener onProgress. SHIT DOESN'T WORK WTF");
-            errorTextBox.setText(progressType.toString() + ": " + String.valueOf(bytesLoaded) + "/" + String.valueOf(bytesTotal));
-        }
+    private void replayCurrent(){
+        Log.d(TAG, "Replay current song");
+        stopAndReset();
+        prepareAndStart();
+        Log.d(TAG, "Current song number: " + currentSongNumber);
+    }
 
-        @Override
-        public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts)
-        {
-            Log.d(TAG, "mRequestListener attemptFailed");
-            errorTextBox.setText(String.format("Attempt %d/%d failed\n", attemptNumber, totalAttempts));
+    // Prepare song for playing
+    private void prepareAndStart(){
+        try {
+            // Get song
+            AudioItem currentSong = audioListFragment.getItem(currentSongNumber);
+            // set UI stuff
+            playerSongTitle.setText(currentSong.getArtist() + " - " + currentSong.getTitle());
+            // Set player
+            mediaPlayer.setDataSource(currentSong.getUrl());
+            mediaPlayer.prepareAsync();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    };
+    }
+
+    // Play song when media player is prepared
+    @Override
+    public void onPrepared(MediaPlayer mediaPlayer) {
+        this.mediaPlayer = mediaPlayer;
+        mediaFileLengthInMilliseconds = mediaPlayer.getDuration(); // gets the song length in milliseconds from URL
+        play();
+        primarySeekBarProgressUpdater();
+    }
+
+    // Obvious method is obvious
+    private void stopAndReset(){
+        mediaPlayer.stop();
+        mediaPlayer.reset();
+    }
+
+    // Play and set pause icon
+    private void play(){
+        mediaPlayer.start();
+        playPauseButton.setImageResource(R.drawable.ic_pause_black_48dp);
+    }
+
+    // Pause and set play icon
+    private void pause(){
+        mediaPlayer.pause();
+        playPauseButton.setImageResource(R.drawable.ic_play_arrow_black_48dp);
+    }
+
+    // MediaPlayer onCompletion event handler. Method which calls then song playing is complete
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        skipNext();
+    }
+
+    // This construction give a percentage of "was playing"/"song length" on seekbar
+    private void primarySeekBarProgressUpdater() {
+        if(seekBar != null
+                && mediaPlayer != null
+                && handler != null) {
+            seekBar.setProgress((int) (((float) mediaPlayer.getCurrentPosition() / mediaFileLengthInMilliseconds) * 100));
+            if (mediaPlayer.isPlaying()) {
+                Runnable notification = new Runnable() {
+                    public void run() {
+                        primarySeekBarProgressUpdater();
+                    }
+                };
+                handler.postDelayed(notification, 250);
+            }
+        }
+    }
+
+
+    @Override
+    public void onStop (){
+        super.onStop();
+
+        // Release media player
+        if(mediaPlayer != null){
+            mediaPlayer.release();
+            Log.d(TAG, "Media player RELEASED");
+        }
+        else
+            Log.d(TAG, "Media player is already null");
+        mediaPlayer = null;
+    }
 
 }

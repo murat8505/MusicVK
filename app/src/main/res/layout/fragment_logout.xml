@@ -10,21 +10,34 @@
         android:layout_height="match_parent"
         android:layout_gravity="center">
 
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="200dp"
+            android:src="@drawable/cry_dog_2x"
+            android:layout_marginTop="120dp"
+            android:scaleType="fitCenter"
+            android:layout_centerHorizontal="true"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/not_logged"
             android:id="@+id/textView"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_above="@+id/log_in"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/secondary_text"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/log_in"
             android:id="@+id/log_in"
-            android:layout_below="@+id/textView"
-            android:layout_centerHorizontal="true" />
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/primary"
+            android:textColor="@color/background"
+            android:layout_marginBottom="80dp"
+            android:layout_marginTop="10dp" />
     </RelativeLayout>
 </FrameLayout>
